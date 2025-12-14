@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Random Joke Generator</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial; max-width: 720px; margin: 3rem auto; padding: 0 1rem; color:#111; }
+    .card { border: 1px solid #e6e6e6; border-radius: 8px; padding: 1.25rem; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
+    button { background:#2563eb; color:white; border:none; padding:0.5rem 1rem; border-radius:6px; cursor:pointer; }
+    button:disabled { opacity:0.6; cursor:not-allowed; }
+    .setup { font-weight:600; margin-bottom:0.75rem; }
+    .punchline { margin-top:0.5rem; color:#065f46; font-weight:700; }
+    .small { color:#6b7280; font-size:0.9rem; }
+  </style>
+</head>
+<body>
+  <h1>Random Joke Generator</h1>
+  <div class="card">
+    <div id="jokeArea">
+      <p class="small">Click "Get Joke" to fetch a random joke from an external API.</p>
+    </div>
+
+    <div style="margin-top:1rem;">
+      <button id="getJokeBtn">Get Joke</button>
+      <button id="copyBtn" style="margin-left:0.5rem;">Copy Joke</button>
+    </div>
+  </div>
+
+  <script>
+    const jokeArea = document.getElementById('jokeArea');
+    const btn = document.getElementById('getJokeBtn');
+    const copyBtn = document.getElementById('copyBtn');
+
+    async function fetchJoke() {
+      btn.disabled = true;
+      btn.innerText = 'Loading...';
+      jokeArea.innerHTML = '<p class="small">Fetching a funny one...</p>';
+      try {
+        const res = await fetch('/api/joke');
+        if (!res.ok) throw new Error('Failed to fetch');
+        const data = await res.json();
+        displayJoke(data);
+      } catch (err) {
+        jokeArea.innerHTML = '<p class="small">Could not fetch a joke right now. Try again later.</p>';
+        console.error(err);
+      } finally {
+        btn.disabled = false;
+        btn.innerText = 'Get Joke';
+      }
+    }
+
+    function displayJoke(j) {
+      if (!j || (!j.setup && !j.punchline)) {
+        jokeArea.innerHTML = '<p class="small">No joke available.</p>';
+        return;
+      }
+      jokeArea.innerHTML = `
+        <div class="setup">${escapeHtml(j.setup || '')}</div>
+        <div class="punchline">${escapeHtml(j.punchline || '')}</div>
+        <div class="small" style="margin-top:.5rem;">Source: ${escapeHtml(j.provider || 'unknown')}</div>
+      `;
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[m]));
+    }
+
+    copyBtn.addEventListener('click', () => {
+      const setupEl = document.querySelector('.setup');
+      const punchEl = document.querySelector('.punchline');
+      if (!setupEl || !punchEl) return;
+      const text = setupEl.innerText + '\n' + punchEl.innerText;
+      navigator.clipboard?.writeText(text).then(() => {
+        copyBtn.innerText = 'Copied!';
+        setTimeout(() => copyBtn.innerText = 'Copy Joke', 1200);
+      }).catch(() => {
+        copyBtn.innerText = 'Copy Failed';
+        setTimeout(() => copyBtn.innerText = 'Copy Joke', 1200);
+      });
+    });
+
+    btn.addEventListener('click', fetchJoke);
+
+    // Fetch a joke on page load
+    fetchJoke();
+  </script>
+</body>
+</html>
