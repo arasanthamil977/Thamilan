@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>QuirkJoke — Random Joke Generator</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="header">
+      <h1 class="logo">QuirkJoke</h1>
+      <p class="tag">A tiny generator for a quick laugh — powered by JokeAPI</p>
+    </header>
+
+    <section class="card" id="jokeCard" aria-live="polite">
+      <div class="joke-content" id="jokeText">
+        <svg class="quote" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M9 7H7a5 5 0 0 0-5 5v5h8v-6a3 3 0 0 1 3-3h2V7h-6zm14 0h-2a5 5 0 0 0-5 5v5h8v-6a3 3 0 0 1 3-3h2V7h-6z" fill="currentColor"/>
+        </svg>
+        <p id="jokeMain" class="joke-main">Click "Another!" to fetch a joke</p>
+      </div>
+
+      <div class="card-actions">
+        <button id="anotherBtn" class="btn primary" title="Get another joke">Another!</button>
+        <div class="right-actions">
+          <button id="copyBtn" class="btn" title="Copy joke">Copy</button>
+          <button id="facebookBtn" class="btn" title="Share on Facebook">Facebook</button>
+
+
+      <div class="meta">
+        <small id="metaText">source: JokeAPI • safe mode</small>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <small>Tip: press Space to get a new joke • Avoids explicit categories</small>
+    </footer>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
