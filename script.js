@@ -1,39 +1,80 @@
-// QuirkJoke — fetches a random joke from JokeAPI and provides UX helpers.
-const API_URL = 'https://v2.jokeapi.dev/joke/Any?blacklistFlags=nsfw,religious,political,racist,sexist,explicit';
+const API_URL =
+  'https://v2.jokeapi.dev/joke/Any?blacklistFlags=nsfw,religious,political,racist,sexist,explicit';
 
 const jokeMain = document.getElementById('jokeMain');
 const anotherBtn = document.getElementById('anotherBtn');
 const copyBtn = document.getElementById('copyBtn');
-const tweetBtn = document.getElementById('tweetBtn');
-const jokeCard = document.getElementById('jokeCard');
+const facebookBtn = document.getElementById('facebookBtn');
 
 let lastJokeText = '';
 let isLoading = false;
 
-async function fetchJoke() {
-  if (isLoading) return;
-  setLoading(true);
-  try {
+async function fetchJoke(){
+  if(isLoading) return;
+  isLoading = true;
+  anotherBtn.textContent = 'Loading...';
+
+  try{
     const res = await fetch(API_URL);
-    if (!res.ok) throw new Error('Network response not ok');
     const data = await res.json();
-    let text = '';
-    if (data.type === 'single') {
-      text = data.joke;
-    } else {
-      // twopart
-      text = `${data.setup}\n\n${data.delivery}`;
-    }
-    showJoke(text);
-  } catch (err) {
-    showJoke('Oops — could not fetch a joke right now. Try again!');
-    console.error(err);
-  } finally {
-    setLoading(false);
+    lastJokeText =
+      data.type === 'single'
+        ? data.joke
+        : `${data.setup}\n\n${data.delivery}`;
+
+    jokeMain.textContent = lastJokeText;
+  }catch{
+    jokeMain.textContent = 'Failed to load joke 😅';
+  }finally{
+    isLoading = false;
+    anotherBtn.textContent = 'Another!';
   }
 }
 
-function showJoke(text) {
+async function copyJoke(){
+  if(!lastJokeText) return;
+  await navigator.clipboard.writeText(lastJokeText);
+  toast('Copied!');
+}
+
+function shareOnFacebook(){
+  if(!lastJokeText) return;
+  const text = encodeURIComponent(lastJokeText);
+  const url =
+    `https://www.facebook.com/sharer/sharer.php?quote=${text}`;
+  window.open(url,'_blank','noopener');
+}
+
+function toast(msg){
+  const t = document.createElement('div');
+  t.textContent = msg;
+  Object.assign(t.style,{
+    position:'fixed',
+    bottom:'24px',
+    left:'50%',
+    transform:'translateX(-50%)',
+    background:'#000000cc',
+    color:'#fff',
+    padding:'8px 14px',
+    borderRadius:'999px',
+    zIndex:9999
+  });
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(),1400);
+}
+
+anotherBtn.onclick = fetchJoke;
+copyBtn.onclick = copyJoke;
+facebookBtn.onclick = shareOnFacebook;
+
+window.addEventListener('keydown',e=>{
+  if(e.code==='Space'){
+    e.preventDefault();
+    fetchJoke();
+  }
+});
+
+fetchJoke();
   lastJokeText = text;
   // small animate: scale + fade
   jokeCard.animate([
