@@ -21,6 +21,7 @@ async function fetchJoke(){
       data.type === 'single'
         ? data.joke
         : `${data.setup}\n\n${data.delivery}`;
+
     jokeMain.textContent = lastJokeText;
   }catch{
     jokeMain.textContent = 'Failed to load joke 😅';
@@ -34,6 +35,46 @@ async function copyJoke(){
   if(!lastJokeText) return;
   await navigator.clipboard.writeText(lastJokeText);
   toast('Copied!');
+}
+
+function shareOnFacebook(){
+  if(!lastJokeText) return;
+  const text = encodeURIComponent(lastJokeText);
+  const url =
+    `https://www.facebook.com/sharer/sharer.php?quote=${text}`;
+  window.open(url,'_blank','noopener');
+}
+
+function toast(msg){
+  const t = document.createElement('div');
+  t.textContent = msg;
+  Object.assign(t.style,{
+    position:'fixed',
+    bottom:'24px',
+    left:'50%',
+    transform:'translateX(-50%)',
+    background:'#000000cc',
+    color:'#fff',
+    padding:'8px 14px',
+    borderRadius:'999px',
+    zIndex:9999
+  });
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(),1400);
+}
+
+anotherBtn.onclick = fetchJoke;
+copyBtn.onclick = copyJoke;
+facebookBtn.onclick = shareOnFacebook;
+
+window.addEventListener('keydown',e=>{
+  if(e.code==='Space'){
+    e.preventDefault();
+    fetchJoke();
+  }
+});
+
+fetchJoke();
 }
 
 function shareOnFacebook(){
